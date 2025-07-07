@@ -66,7 +66,7 @@ class PZXTabbarItem: UIView {
         self.selectedColor = selectedColor
         self.unselectedColor = unselectedColor
         titleLabel.text = title
-        iconView.image = UIImage(systemName: iconName)
+        iconView.image = UIImage(named: iconName)
         updateColors()
     }
     
