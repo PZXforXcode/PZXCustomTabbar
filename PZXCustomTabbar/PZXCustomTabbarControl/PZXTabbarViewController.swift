@@ -17,7 +17,8 @@ class PZXTabbarViewController: UIViewController {
     // MARK: - 私有属性
     private var viewControllersList: [UIViewController]
     private let titles: [String]
-    private let icons: [String]
+    private let unselectedIcons: [String]
+    private let selectedIcons: [String]
     private let selectedColor: UIColor
     private let unselectedColor: UIColor
     private var centerView: UIView?
@@ -29,14 +30,16 @@ class PZXTabbarViewController: UIViewController {
     /// - Parameters:
     ///   - viewControllers: 需要展示的子控制器，顺序即按钮顺序
     ///   - titles: 按钮标题
-    ///   - icons: 按钮图标
+    ///   - unselectedIcons: 未选中图标
+    ///   - selectedIcons:   选中图标
     ///   - selectedColor: 选中状态下的颜色
     ///   - unselectedColor: 未选中状态下的颜色
     ///   - centerView: 可选中心按钮视图
-    init(viewControllers: [UIViewController], titles: [String], icons: [String], selectedColor: UIColor, unselectedColor: UIColor, centerView: UIView? = nil) {
+    init(viewControllers: [UIViewController], titles: [String], unselectedIcons: [String], selectedIcons: [String], selectedColor: UIColor, unselectedColor: UIColor, centerView: UIView? = nil) {
         self.viewControllersList = viewControllers
         self.titles = titles
-        self.icons = icons
+        self.unselectedIcons = unselectedIcons
+        self.selectedIcons = selectedIcons
         self.selectedColor = selectedColor
         self.unselectedColor = unselectedColor
         self.centerView = centerView
@@ -56,10 +59,12 @@ class PZXTabbarViewController: UIViewController {
     private func setupTabBar() {
         // 保证数量一致
         let validTitles = titles.count == viewControllersList.count ? titles : viewControllersList.map { $0.title ?? "" }
-        let validIcons = icons.count == viewControllersList.count ? icons : Array(repeating: "square", count: viewControllersList.count)
+        let validUnselectedIcons = unselectedIcons.count == viewControllersList.count ? unselectedIcons : Array(repeating: "square", count: viewControllersList.count)
+        let validSelectedIcons = selectedIcons.count == viewControllersList.count ? selectedIcons : validUnselectedIcons
         
         tabBar = PZXCustomTabBar(titles: validTitles,
-                                 icons: validIcons,
+                                 unselectedIcons: validUnselectedIcons,
+                                 selectedIcons: validSelectedIcons,
                                  selectedColor: selectedColor,
                                  unselectedColor: unselectedColor,
                                  centerView: centerView)

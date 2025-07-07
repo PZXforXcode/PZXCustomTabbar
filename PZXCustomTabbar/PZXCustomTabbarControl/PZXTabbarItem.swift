@@ -10,6 +10,9 @@ class PZXTabbarItem: UIView {
     // MARK: 颜色
     private var selectedColor: UIColor = .systemBlue
     private var unselectedColor: UIColor = .gray
+    // 选中/未选中图标名称
+    private var unselectedImageName: String = ""
+    private var selectedImageName: String = ""
     
     // 选中状态
     var isSelected: Bool = false {
@@ -61,18 +64,25 @@ class PZXTabbarItem: UIView {
         ])
     }
     
-    /// 配置内容
-    func configure(title: String, iconName: String, selectedColor: UIColor, unselectedColor: UIColor) {
+    /// 配置内容：支持未选中/选中两张图片
+    func configure(title: String,
+                   unselectedImageName: String,
+                   selectedImageName: String,
+                   selectedColor: UIColor,
+                   unselectedColor: UIColor) {
         self.selectedColor = selectedColor
         self.unselectedColor = unselectedColor
+        self.unselectedImageName = unselectedImageName
+        self.selectedImageName = selectedImageName
         titleLabel.text = title
-        iconView.image = UIImage(named: iconName)
-        updateColors()
+        updateColors() // 初始化时刷新
     }
     
     private func updateColors() {
         let color = isSelected ? selectedColor : unselectedColor
         titleLabel.textColor = color
+        let imageName = isSelected ? selectedImageName : unselectedImageName
+        iconView.image = UIImage(named: imageName)
         iconView.tintColor = color
     }
     

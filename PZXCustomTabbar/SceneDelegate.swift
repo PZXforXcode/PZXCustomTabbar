@@ -47,12 +47,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         centerBtn.frame = CGRect(x: 0, y: 0, width: 64, height: 64) // 固定大小
         
         let titles = ["Discover","Sessions","Inbox","Account"]
-        let icons = ["map","doc.text","bell","person"]
+        let unselectedIcons = ["Discover","Sessions","Inbox","Account"]
+        let selectedIcons = ["Discover_selected","Sessions_selected","Inbox_selected","Account_selected"] // 示例：演示用，项目中可替换为 *_selected 资源
         
         let rootVC = PZXTabbarViewController(
             viewControllers: [discoverVC, sessionsVC, inboxVC, accountVC],
             titles: titles,
-            icons: icons,
+            unselectedIcons: unselectedIcons,
+            selectedIcons: selectedIcons,
             selectedColor: selectedColor,
             unselectedColor: unselectedColor,
             centerView: centerBtn)

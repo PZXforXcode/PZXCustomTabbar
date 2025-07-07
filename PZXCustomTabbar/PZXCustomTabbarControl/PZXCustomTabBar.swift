@@ -18,21 +18,22 @@ class PZXCustomTabBar: UIView {
     // MARK: - 初始化
     /// - Parameters:
     ///   - titles: 普通项标题数组 (最少2，最多4)
-    ///   - icons: 对应 SF Symbol 名称数组，数量需与 titles 相同
+    ///   - unselectedIcons: 未选中图标名称数组，数量需与 titles 相同
+    ///   - selectedIcons:   选中图标名称数组，数量需与 titles 相同
     ///   - selectedColor: 选中颜色
     ///   - unselectedColor: 未选中颜色
     ///   - centerView: 可选中心自定义视图（UIButton/UIView），如 nil 则无中心按钮
-    init(titles: [String], icons: [String], selectedColor: UIColor, unselectedColor: UIColor, centerView: UIView? = nil) {
+    init(titles: [String], unselectedIcons: [String], selectedIcons: [String], selectedColor: UIColor, unselectedColor: UIColor, centerView: UIView? = nil) {
         self.selectedColor = selectedColor
         self.unselectedColor = unselectedColor
         self.centerView = centerView
         super.init(frame: .zero)
-        buildUI(titles: titles, icons: icons)
+        buildUI(titles: titles, unselectedIcons: unselectedIcons, selectedIcons: selectedIcons)
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
     // MARK: - UI 构建
-    private func buildUI(titles: [String], icons: [String]) {
+    private func buildUI(titles: [String], unselectedIcons: [String], selectedIcons: [String]) {
         backgroundColor = .white
         layer.shadowColor = UIColor.black.cgColor
         layer.shadowOpacity = 0.08
@@ -56,7 +57,11 @@ class PZXCustomTabBar: UIView {
         for i in 0..<titles.count {
             let item = PZXTabbarItem()
             item.tag = i
-            item.configure(title: titles[i], iconName: icons[i], selectedColor: selectedColor, unselectedColor: unselectedColor)
+            item.configure(title: titles[i],
+                           unselectedImageName: unselectedIcons[i],
+                           selectedImageName: selectedIcons[i],
+                           selectedColor: selectedColor,
+                           unselectedColor: unselectedColor)
             item.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(itemTapped(_:))))
             items.append(item)
             stackView.addArrangedSubview(item)
