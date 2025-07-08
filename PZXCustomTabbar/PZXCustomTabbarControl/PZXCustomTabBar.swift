@@ -13,7 +13,7 @@ class PZXCustomTabBar: UIView {
     // UI
     private let stackView = UIStackView()
     private var items: [PZXTabbarItem] = []
-    private var centerView: UIView?
+    var centerView: UIView?
     
     // MARK: - 初始化
     /// - Parameters:

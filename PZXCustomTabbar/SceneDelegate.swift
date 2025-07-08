@@ -28,15 +28,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // 创建自定义的DiscoverViewController并包装在导航控制器中
         let discoverVC = DiscoverViewController()
         let discoverNavVC = UINavigationController(rootViewController: discoverVC)
+        
         let sessionsVC = UIViewController()
         sessionsVC.view.backgroundColor = .systemGreen
         sessionsVC.title = "Sessions"
+        let sessionsNavVC = UINavigationController(rootViewController: sessionsVC)
+        
         let inboxVC = UIViewController()
         inboxVC.view.backgroundColor = .systemOrange
         inboxVC.title = "Inbox"
+        let inboxNavVC = UINavigationController(rootViewController: inboxVC)
+        
         let accountVC = UIViewController()
         accountVC.view.backgroundColor = .systemPurple
         accountVC.title = "Account"
+        let accountNavVC = UINavigationController(rootViewController: accountVC)
         
         // 自定义中心按钮
         let centerBtn = UIButton(type: .custom)
@@ -46,18 +52,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         centerBtn.layer.cornerRadius = 32
         centerBtn.frame = CGRect(x: 0, y: 0, width: 64, height: 64) // 固定大小
         
-        let titles = ["Discover","Sessions","Inbox","Account"]
-        let unselectedIcons = ["Discover","Sessions","Inbox","Account"]
-        let selectedIcons = ["Discover_selected","Sessions_selected","Inbox_selected","Account_selected"] // 示例：演示用，项目中可替换为 *_selected 资源
-        
+        // 使用重构后的 PZXTabbarViewController 作为根控制器
         let rootVC = PZXTabbarViewController(
-            viewControllers: [discoverNavVC, sessionsVC, inboxVC, accountVC],
-            titles: titles,
-            unselectedIcons: unselectedIcons,
-            selectedIcons: selectedIcons,
+            viewControllers: [discoverNavVC, sessionsNavVC, inboxNavVC, accountNavVC],
+            titles: ["Discover","Sessions","Inbox","Account"],
+            unselectedIcons: ["Discover","Sessions","Inbox","Account"],
+            selectedIcons: ["Discover_selected","Sessions_selected","Inbox_selected","Account_selected"],
             selectedColor: selectedColor,
             unselectedColor: unselectedColor,
-            centerView: centerBtn)
+            centerView: centerBtn
+        )
+        
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = rootVC
         window?.makeKeyAndVisible()

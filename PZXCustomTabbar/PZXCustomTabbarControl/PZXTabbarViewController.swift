@@ -7,15 +7,10 @@
 
 import UIKit
 
-/// 自定义 TabBar 控制器，可灵活配置子控制器、颜色和中心按钮
-class PZXTabbarViewController: UIViewController {
-    
-    // MARK: - 公有属性
-    /// 供外部读取当前选中索引
-    private(set) var selectedIndex: Int = 0
+/// 自定义 TabBar 控制器，继承自 UITabBarController 以获得系统级功能
+class PZXTabbarViewController: UITabBarController {
     
     // MARK: - 私有属性
-    private var viewControllersList: [UIViewController]
     private let titles: [String]
     private let unselectedIcons: [String]
     private let selectedIcons: [String]
@@ -23,12 +18,12 @@ class PZXTabbarViewController: UIViewController {
     private let unselectedColor: UIColor
     private var centerView: UIView?
     
-    var tabBar: PZXCustomTabBar!
-    private var currentVC: UIViewController?
+    // 我们自定义的 TabBar 视图 (UIView)
+    private var pzx_customTabBar: PZXCustomTabBar!
     
     // MARK: - 初始化
     /// - Parameters:
-    ///   - viewControllers: 需要展示的子控制器，顺序即按钮顺序
+    ///   - viewControllers: 需要展示的子控制器，会直接赋值给 UITabBarController
     ///   - titles: 按钮标题
     ///   - unselectedIcons: 未选中图标
     ///   - selectedIcons:   选中图标
@@ -36,7 +31,6 @@ class PZXTabbarViewController: UIViewController {
     ///   - unselectedColor: 未选中状态下的颜色
     ///   - centerView: 可选中心按钮视图
     init(viewControllers: [UIViewController], titles: [String], unselectedIcons: [String], selectedIcons: [String], selectedColor: UIColor, unselectedColor: UIColor, centerView: UIView? = nil) {
-        self.viewControllersList = viewControllers
         self.titles = titles
         self.unselectedIcons = unselectedIcons
         self.selectedIcons = selectedIcons
@@ -44,141 +38,60 @@ class PZXTabbarViewController: UIViewController {
         self.unselectedColor = unselectedColor
         self.centerView = centerView
         super.init(nibName: nil, bundle: nil)
+        
+        // 直接将子控制器设置给父类
+        self.viewControllers = viewControllers
     }
     
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupTabBar()
-        switchToIndex(0)
-        tabBar.selectItem(at: 0)
-        setupNavigationObserver()
-    }
-    
-    private func setupNavigationObserver() {
-        // 监听导航控制器的变化
-        for vc in viewControllersList {
-            if let navController = vc as? UINavigationController {
-                navController.delegate = self
-            }
-        }
-    }
-    
-    /// 根据转场进度更新TabBar位置
-    private func updateTabBarForTransition(progress: CGFloat, shouldHideTabBar: Bool, fromHidden: Bool) {
-        let hideDistance: CGFloat = 80 + 32 // TabBar 80 + 中心按钮突出 32
-        
-        if shouldHideTabBar {
-            // 要隐藏TabBar：从0移动到完全隐藏
-            let translation = progress * hideDistance
-            tabBar.transform = CGAffineTransform(translationX: 0, y: translation)
-        } else {
-            // 要显示TabBar：从隐藏位置移动到0
-            let translation = fromHidden ? (1.0 - progress) * hideDistance : 0
-            tabBar.transform = CGAffineTransform(translationX: 0, y: translation)
-        }
+        setupCustomTabBar()
     }
     
     // MARK: - 构建自定义 TabBar
-    private func setupTabBar() {
-        // 保证数量一致
-        let validTitles = titles.count == viewControllersList.count ? titles : viewControllersList.map { $0.title ?? "" }
-        let validUnselectedIcons = unselectedIcons.count == viewControllersList.count ? unselectedIcons : Array(repeating: "square", count: viewControllersList.count)
-        let validSelectedIcons = selectedIcons.count == viewControllersList.count ? selectedIcons : validUnselectedIcons
+    private func setupCustomTabBar() {
+        // 1. 初始化我们自定义的 UIView
+        pzx_customTabBar = PZXCustomTabBar(
+            titles: titles,
+            unselectedIcons: unselectedIcons,
+            selectedIcons: selectedIcons,
+            selectedColor: selectedColor,
+            unselectedColor: unselectedColor,
+            centerView: centerView
+        )
         
-        tabBar = PZXCustomTabBar(titles: validTitles,
-                                 unselectedIcons: validUnselectedIcons,
-                                 selectedIcons: validSelectedIcons,
-                                 selectedColor: selectedColor,
-                                 unselectedColor: unselectedColor,
-                                 centerView: centerView)
-        tabBar.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(tabBar)
-        NSLayoutConstraint.activate([
-            tabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            tabBar.heightAnchor.constraint(equalToConstant: 80)
-        ])
-        tabBar.onItemSelected = { [weak self] index in
-            self?.switchToIndex(index)
+        // 2. 设置回调：当自定义视图中的按钮被点击时，切换 UITabBarController 的 selectedIndex
+        pzx_customTabBar.onItemSelected = { [weak self] index in
+            self?.selectedIndex = index
         }
-        tabBar.onCenterTapped = { print("中心按钮点击") }
-    }
-    
-    // MARK: - 切换 VC
-    private func switchToIndex(_ index: Int) {
-        guard index < viewControllersList.count else { return }
-        selectedIndex = index
         
-        // 移除旧 VC
-        currentVC?.willMove(toParent: nil)
-        currentVC?.view.removeFromSuperview()
-        currentVC?.removeFromParent()
+        // 3. 中心按钮点击回调
+        pzx_customTabBar.onCenterTapped = {
+            print("中心按钮点击")
+        }
         
-        // 添加新 VC
-        let vc = viewControllersList[index]
-        addChild(vc)
-        vc.view.translatesAutoresizingMaskIntoConstraints = false
-        view.insertSubview(vc.view, belowSubview: tabBar)
+        // 4. 初始化我们自定义的 UITabBar 子类，并将自定义的 UIView 传入
+        let tabBar = PZXTabBar(customTabBarView: pzx_customTabBar)
         
-        // 设置约束，使视图填充到屏幕底部（包括TabBar区域）
-        NSLayoutConstraint.activate([
-            vc.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            vc.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            vc.view.topAnchor.constraint(equalTo: view.topAnchor),
-            vc.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-        vc.didMove(toParent: self)
-        currentVC = vc
+        // 5. 【关键】通过 KVC 将系统原生的 tabBar 替换为我们自定义的 tabBar
+        self.setValue(tabBar, forKey: "tabBar")
+        
+        // 6. 默认选中第一个
+        selectTab(at: 0)
     }
     
     // MARK: - 对外开放功能
     /// 主动选择某个Tab
     func selectTab(at index: Int) {
-        tabBar.selectItem(at: index)
-        switchToIndex(index)
+        self.selectedIndex = index
+        pzx_customTabBar.selectItem(at: index)
     }
+    
     /// 设置某个Tab的红点显隐
     func setBadge(at index: Int, visible: Bool) {
-        tabBar.setBadge(at: index, visible: visible)
-    }
-    
-
-}
-
-// MARK: - UINavigationControllerDelegate
-extension PZXTabbarViewController: UINavigationControllerDelegate {
-    
-    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
-        let shouldHideTabBar = viewController.pzxHidesBottomBarWhenPushed
-        // 计算需要隐藏的距离：TabBar高度 + 中心按钮突出部分
-        let hideDistance: CGFloat = 80 + 32 // TabBar 80 + 中心按钮突出 32
-        
-        if animated, let coordinator = navigationController.transitionCoordinator {
-            // 使用转场协调器实现系统级动画
-            coordinator.animate(alongsideTransition: { _ in
-                self.tabBar.transform = shouldHideTabBar ? CGAffineTransform(translationX: 0, y: hideDistance) : .identity
-            }, completion: { context in
-                // 处理取消的情况
-                if context.isCancelled {
-                    let fromVC = context.viewController(forKey: .from)
-                    let shouldRestore = fromVC?.pzxHidesBottomBarWhenPushed ?? false
-                    self.tabBar.transform = shouldRestore ? CGAffineTransform(translationX: 0, y: hideDistance) : .identity
-                }
-            })
-        } else {
-            // 无动画直接设置
-            tabBar.transform = shouldHideTabBar ? CGAffineTransform(translationX: 0, y: hideDistance) : .identity
-        }
-    }
-    
-    func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
-        // 确保TabBar状态正确
-        let shouldHideTabBar = viewController.pzxHidesBottomBarWhenPushed
-        let hideDistance: CGFloat = 80 + 32 // TabBar 80 + 中心按钮突出 32
-        tabBar.transform = shouldHideTabBar ? CGAffineTransform(translationX: 0, y: hideDistance) : .identity
+        pzx_customTabBar.setBadge(at: index, visible: visible)
     }
 }
 
@@ -186,6 +99,7 @@ extension PZXTabbarViewController: UINavigationControllerDelegate {
 extension UIApplication {
     /// 全局快捷访问自定义 TabBar 控制器
     static var pzxTabbarVC: PZXTabbarViewController? {
+        // 由于我们的根控制器现在就是 PZXTabbarViewController，所以可以直接转换
         return UIApplication.shared
             .connectedScenes
             .compactMap { $0 as? UIWindowScene }
@@ -198,18 +112,21 @@ extension UIApplication {
 
 
 // MARK: - UIViewController Extension for Custom TabBar
-extension UIViewController {
-    /// 类似系统的 hidesBottomBarWhenPushed，用于自定义TabBar
-    var pzxHidesBottomBarWhenPushed: Bool {
-        get {
-            return objc_getAssociatedObject(self, AssociatedKeys.hidesBottomBar) as? Bool ?? false
-        }
-        set {
-            objc_setAssociatedObject(self, AssociatedKeys.hidesBottomBar, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
-    }
-    
-    private struct AssociatedKeys {
-        static let hidesBottomBar = UnsafeMutablePointer<UInt8>.allocate(capacity: 1)
-    }
-}
+// 这一部分不再需要，可以直接使用系统提供的 hidesBottomBarWhenPushed 属性
+/*
+ extension UIViewController {
+     /// 类似系统的 hidesBottomBarWhenPushed，用于自定义TabBar
+     var pzxHidesBottomBarWhenPushed: Bool {
+         get {
+             return objc_getAssociatedObject(self, AssociatedKeys.hidesBottomBar) as? Bool ?? false
+         }
+         set {
+             objc_setAssociatedObject(self, AssociatedKeys.hidesBottomBar, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+         }
+     }
+     
+     private struct AssociatedKeys {
+         static let hidesBottomBar = UnsafeMutablePointer<UInt8>.allocate(capacity: 1)
+     }
+ }
+ */

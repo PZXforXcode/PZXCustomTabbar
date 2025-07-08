@@ -78,7 +78,7 @@ class DiscoverViewController: UIViewController {
         let detailVC = DetailViewController()
         // 可以在这里设置，也可以在DetailViewController内部设置
         // 类似系统的 hidesBottomBarWhenPushed
-         detailVC.pzxHidesBottomBarWhenPushed = true
+        detailVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(detailVC, animated: true)
     }
 } 
