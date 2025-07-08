@@ -23,7 +23,7 @@ class PZXTabbarViewController: UIViewController {
     private let unselectedColor: UIColor
     private var centerView: UIView?
     
-    private var tabBar: PZXCustomTabBar!
+    var tabBar: PZXCustomTabBar!
     private var currentVC: UIViewController?
     
     // MARK: - 初始化
@@ -53,6 +53,31 @@ class PZXTabbarViewController: UIViewController {
         setupTabBar()
         switchToIndex(0)
         tabBar.selectItem(at: 0)
+        setupNavigationObserver()
+    }
+    
+    private func setupNavigationObserver() {
+        // 监听导航控制器的变化
+        for vc in viewControllersList {
+            if let navController = vc as? UINavigationController {
+                navController.delegate = self
+            }
+        }
+    }
+    
+    /// 根据转场进度更新TabBar位置
+    private func updateTabBarForTransition(progress: CGFloat, shouldHideTabBar: Bool, fromHidden: Bool) {
+        let hideDistance: CGFloat = 80 + 32 // TabBar 80 + 中心按钮突出 32
+        
+        if shouldHideTabBar {
+            // 要隐藏TabBar：从0移动到完全隐藏
+            let translation = progress * hideDistance
+            tabBar.transform = CGAffineTransform(translationX: 0, y: translation)
+        } else {
+            // 要显示TabBar：从隐藏位置移动到0
+            let translation = fromHidden ? (1.0 - progress) * hideDistance : 0
+            tabBar.transform = CGAffineTransform(translationX: 0, y: translation)
+        }
     }
     
     // MARK: - 构建自定义 TabBar
@@ -97,11 +122,13 @@ class PZXTabbarViewController: UIViewController {
         addChild(vc)
         vc.view.translatesAutoresizingMaskIntoConstraints = false
         view.insertSubview(vc.view, belowSubview: tabBar)
+        
+        // 设置约束，使视图填充到屏幕底部（包括TabBar区域）
         NSLayoutConstraint.activate([
             vc.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             vc.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             vc.view.topAnchor.constraint(equalTo: view.topAnchor),
-            vc.view.bottomAnchor.constraint(equalTo: tabBar.topAnchor)
+            vc.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         vc.didMove(toParent: self)
         currentVC = vc
@@ -116,6 +143,42 @@ class PZXTabbarViewController: UIViewController {
     /// 设置某个Tab的红点显隐
     func setBadge(at index: Int, visible: Bool) {
         tabBar.setBadge(at: index, visible: visible)
+    }
+    
+
+}
+
+// MARK: - UINavigationControllerDelegate
+extension PZXTabbarViewController: UINavigationControllerDelegate {
+    
+    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+        let shouldHideTabBar = viewController.pzxHidesBottomBarWhenPushed
+        // 计算需要隐藏的距离：TabBar高度 + 中心按钮突出部分
+        let hideDistance: CGFloat = 80 + 32 // TabBar 80 + 中心按钮突出 32
+        
+        if animated, let coordinator = navigationController.transitionCoordinator {
+            // 使用转场协调器实现系统级动画
+            coordinator.animate(alongsideTransition: { _ in
+                self.tabBar.transform = shouldHideTabBar ? CGAffineTransform(translationX: 0, y: hideDistance) : .identity
+            }, completion: { context in
+                // 处理取消的情况
+                if context.isCancelled {
+                    let fromVC = context.viewController(forKey: .from)
+                    let shouldRestore = fromVC?.pzxHidesBottomBarWhenPushed ?? false
+                    self.tabBar.transform = shouldRestore ? CGAffineTransform(translationX: 0, y: hideDistance) : .identity
+                }
+            })
+        } else {
+            // 无动画直接设置
+            tabBar.transform = shouldHideTabBar ? CGAffineTransform(translationX: 0, y: hideDistance) : .identity
+        }
+    }
+    
+    func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
+        // 确保TabBar状态正确
+        let shouldHideTabBar = viewController.pzxHidesBottomBarWhenPushed
+        let hideDistance: CGFloat = 80 + 32 // TabBar 80 + 中心按钮突出 32
+        tabBar.transform = shouldHideTabBar ? CGAffineTransform(translationX: 0, y: hideDistance) : .identity
     }
 }
 
@@ -133,3 +196,20 @@ extension UIApplication {
     }
 }
 
+
+// MARK: - UIViewController Extension for Custom TabBar
+extension UIViewController {
+    /// 类似系统的 hidesBottomBarWhenPushed，用于自定义TabBar
+    var pzxHidesBottomBarWhenPushed: Bool {
+        get {
+            return objc_getAssociatedObject(self, AssociatedKeys.hidesBottomBar) as? Bool ?? false
+        }
+        set {
+            objc_setAssociatedObject(self, AssociatedKeys.hidesBottomBar, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
+    private struct AssociatedKeys {
+        static let hidesBottomBar = UnsafeMutablePointer<UInt8>.allocate(capacity: 1)
+    }
+}

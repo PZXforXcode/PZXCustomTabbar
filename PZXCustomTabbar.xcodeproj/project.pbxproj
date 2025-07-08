@@ -15,6 +15,9 @@
 		893CD1F02E17B28900AA14C3 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893CD1E72E17B28900AA14C3 /* SceneDelegate.swift */; };
 		893CD1F12E17B28900AA14C3 /* PZXTabbarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893CD1E82E17B28900AA14C3 /* PZXTabbarViewController.swift */; };
 		893CD1F52E17C03500AA14C3 /* PZXTabbarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893CD1F42E17C03500AA14C3 /* PZXTabbarItem.swift */; };
+		89A9EDFE2E1CDE2C008161A2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A9EDFD2E1CDE2C008161A2 /* ViewController.swift */; };
+		89A9EDFF2E1CDE2D008161A2 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A9EDFE2E1CDE2D008161A2 /* DetailViewController.swift */; };
+		89A9EE002E1CDE2E008161A2 /* DiscoverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A9EDFF2E1CDE2E008161A2 /* DiscoverViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +31,9 @@
 		893CD1E72E17B28900AA14C3 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		893CD1E82E17B28900AA14C3 /* PZXTabbarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PZXTabbarViewController.swift; sourceTree = "<group>"; };
 		893CD1F42E17C03500AA14C3 /* PZXTabbarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PZXTabbarItem.swift; sourceTree = "<group>"; };
+		89A9EDFD2E1CDE2C008161A2 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		89A9EDFE2E1CDE2D008161A2 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
+		89A9EDFF2E1CDE2E008161A2 /* DiscoverViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +66,9 @@
 		893CD1E92E17B28900AA14C3 /* PZXCustomTabbar */ = {
 			isa = PBXGroup;
 			children = (
+				89A9EDFD2E1CDE2C008161A2 /* ViewController.swift */,
+				89A9EDFE2E1CDE2D008161A2 /* DetailViewController.swift */,
+				89A9EDFF2E1CDE2E008161A2 /* DiscoverViewController.swift */,
 				893CD1F62E17CFB400AA14C3 /* PZXCustomTabbarControl */,
 				893CD1DF2E17B28900AA14C3 /* AppDelegate.swift */,
 				893CD1E02E17B28900AA14C3 /* Assets.xcassets */,
@@ -155,6 +164,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				89A9EDFE2E1CDE2C008161A2 /* ViewController.swift in Sources */,
+				89A9EDFF2E1CDE2D008161A2 /* DetailViewController.swift in Sources */,
+				89A9EE002E1CDE2E008161A2 /* DiscoverViewController.swift in Sources */,
 				893CD1EE2E17B28900AA14C3 /* AppDelegate.swift in Sources */,
 				893CD1EF2E17B28900AA14C3 /* PZXCustomTabBar.swift in Sources */,
 				893CD1F02E17B28900AA14C3 /* SceneDelegate.swift in Sources */,

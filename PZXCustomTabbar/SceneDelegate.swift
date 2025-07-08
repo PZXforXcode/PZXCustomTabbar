@@ -25,9 +25,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         //let selectedColor = UIColor.red
 //        let unselectedColor = UIColor.cyan
         
-        let discoverVC = UIViewController()
-        discoverVC.view.backgroundColor = .systemBlue
-        discoverVC.title = "Discover"
+        // 创建自定义的DiscoverViewController并包装在导航控制器中
+        let discoverVC = DiscoverViewController()
+        let discoverNavVC = UINavigationController(rootViewController: discoverVC)
         let sessionsVC = UIViewController()
         sessionsVC.view.backgroundColor = .systemGreen
         sessionsVC.title = "Sessions"
@@ -51,7 +51,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let selectedIcons = ["Discover_selected","Sessions_selected","Inbox_selected","Account_selected"] // 示例：演示用，项目中可替换为 *_selected 资源
         
         let rootVC = PZXTabbarViewController(
-            viewControllers: [discoverVC, sessionsVC, inboxVC, accountVC],
+            viewControllers: [discoverNavVC, sessionsVC, inboxVC, accountVC],
             titles: titles,
             unselectedIcons: unselectedIcons,
             selectedIcons: selectedIcons,
