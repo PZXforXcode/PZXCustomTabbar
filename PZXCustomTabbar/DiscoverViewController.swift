@@ -54,6 +54,19 @@ class DiscoverViewController: UIViewController {
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(descriptionLabel)
         
+        // 创建动画控制按钮
+        let animationToggleButton = UIButton(type: .system)
+        animationToggleButton.setTitle("关闭TabBar点击动画", for: .normal)
+        animationToggleButton.setTitleColor(.white, for: .normal)
+        animationToggleButton.backgroundColor = UIColor.white.withAlphaComponent(0.2)
+        animationToggleButton.layer.cornerRadius = 20
+        animationToggleButton.layer.borderWidth = 1
+        animationToggleButton.layer.borderColor = UIColor.white.cgColor
+        animationToggleButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
+        animationToggleButton.addTarget(self, action: #selector(toggleAnimation), for: .touchUpInside)
+        animationToggleButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(animationToggleButton)
+        
         // 设置约束
         NSLayoutConstraint.activate([
             // 标题标签约束
@@ -70,8 +83,28 @@ class DiscoverViewController: UIViewController {
             descriptionLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             descriptionLabel.topAnchor.constraint(equalTo: centerButton.bottomAnchor, constant: 30),
             descriptionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            descriptionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+            descriptionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            
+            // 动画控制按钮约束
+            animationToggleButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            animationToggleButton.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 40),
+            animationToggleButton.widthAnchor.constraint(equalToConstant: 200),
+            animationToggleButton.heightAnchor.constraint(equalToConstant: 40)
         ])
+    }
+    
+    // 私有属性：记录动画状态
+    private var isAnimationEnabled = true
+    
+    @objc private func toggleAnimation() {
+        isAnimationEnabled.toggle()
+        UIApplication.pzxTabbarVC?.setTapAnimationEnabled(isAnimationEnabled)
+        
+        // 更新按钮标题
+        let buttonTitle = isAnimationEnabled ? "关闭TabBar点击动画" : "开启TabBar点击动画"
+        if let button = view.subviews.first(where: { $0 is UIButton && ($0 as? UIButton)?.titleLabel?.text?.contains("TabBar") == true }) as? UIButton {
+            button.setTitle(buttonTitle, for: .normal)
+        }
     }
     
     @objc private func centerButtonTapped() {

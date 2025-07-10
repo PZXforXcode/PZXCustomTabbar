@@ -60,7 +60,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             selectedIcons: ["Discover_selected","Sessions_selected","Inbox_selected","Account_selected"],
             selectedColor: selectedColor,
             unselectedColor: unselectedColor,
-            centerView: centerBtn
+            centerView: centerBtn,
+            enableTapAnimation: true  // 开启点击动画效果
         )
         
         window = UIWindow(windowScene: windowScene)
@@ -83,6 +84,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         UIApplication.pzxTabbarVC?.selectTab(at: 1)
         UIApplication.pzxTabbarVC?.setBadge(at: 2, visible: true)
 //        UIApplication.pzxTabbarVC?.setBadge(at: 3, visible: true)
+        
+        // 动画控制示例：可以在运行时动态开关动画
+        // UIApplication.pzxTabbarVC?.setTapAnimationEnabled(false)  // 关闭动画
+        // UIApplication.pzxTabbarVC?.setTapAnimationEnabled(true)   // 开启动画
     }
 
     func sceneWillResignActive(_ scene: UIScene) {

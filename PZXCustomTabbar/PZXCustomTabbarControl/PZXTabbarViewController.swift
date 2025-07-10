@@ -17,6 +17,8 @@ class PZXTabbarViewController: UITabBarController {
     private let selectedColor: UIColor
     private let unselectedColor: UIColor
     private var centerView: UIView?
+    // 动画开关参数
+    private let enableTapAnimation: Bool
     
     // 我们自定义的 TabBar 视图 (UIView)
     private var pzx_customTabBar: PZXCustomTabBar!
@@ -30,13 +32,15 @@ class PZXTabbarViewController: UITabBarController {
     ///   - selectedColor: 选中状态下的颜色
     ///   - unselectedColor: 未选中状态下的颜色
     ///   - centerView: 可选中心按钮视图
-    init(viewControllers: [UIViewController], titles: [String], unselectedIcons: [String], selectedIcons: [String], selectedColor: UIColor, unselectedColor: UIColor, centerView: UIView? = nil) {
+    ///   - enableTapAnimation: 是否开启点击动画效果，默认为true
+    init(viewControllers: [UIViewController], titles: [String], unselectedIcons: [String], selectedIcons: [String], selectedColor: UIColor, unselectedColor: UIColor, centerView: UIView? = nil, enableTapAnimation: Bool = true) {
         self.titles = titles
         self.unselectedIcons = unselectedIcons
         self.selectedIcons = selectedIcons
         self.selectedColor = selectedColor
         self.unselectedColor = unselectedColor
         self.centerView = centerView
+        self.enableTapAnimation = enableTapAnimation
         super.init(nibName: nil, bundle: nil)
         
         // 直接将子控制器设置给父类
@@ -52,14 +56,15 @@ class PZXTabbarViewController: UITabBarController {
     
     // MARK: - 构建自定义 TabBar
     private func setupCustomTabBar() {
-        // 1. 初始化我们自定义的 UIView
+        // 1. 初始化我们自定义的 UIView，传入动画开关参数
         pzx_customTabBar = PZXCustomTabBar(
             titles: titles,
             unselectedIcons: unselectedIcons,
             selectedIcons: selectedIcons,
             selectedColor: selectedColor,
             unselectedColor: unselectedColor,
-            centerView: centerView
+            centerView: centerView,
+            enableTapAnimation: enableTapAnimation
         )
         
         // 2. 设置回调：当自定义视图中的按钮被点击时，切换 UITabBarController 的 selectedIndex
@@ -92,6 +97,11 @@ class PZXTabbarViewController: UITabBarController {
     /// 设置某个Tab的红点显隐
     func setBadge(at index: Int, visible: Bool) {
         pzx_customTabBar.setBadge(at: index, visible: visible)
+    }
+    
+    /// 动态开关点击动画
+    func setTapAnimationEnabled(_ enabled: Bool) {
+        pzx_customTabBar.setTapAnimationEnabled(enabled)
     }
 }
 

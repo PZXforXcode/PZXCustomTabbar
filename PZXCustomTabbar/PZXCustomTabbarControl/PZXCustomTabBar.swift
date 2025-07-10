@@ -10,6 +10,9 @@ class PZXCustomTabBar: UIView {
     private let selectedColor: UIColor
     private let unselectedColor: UIColor
     
+    // 动画控制
+    private var enableTapAnimation: Bool
+    
     // UI
     private let stackView = UIStackView()
     private var items: [PZXTabbarItem] = []
@@ -23,10 +26,12 @@ class PZXCustomTabBar: UIView {
     ///   - selectedColor: 选中颜色
     ///   - unselectedColor: 未选中颜色
     ///   - centerView: 可选中心自定义视图（UIButton/UIView），如 nil 则无中心按钮
-    init(titles: [String], unselectedIcons: [String], selectedIcons: [String], selectedColor: UIColor, unselectedColor: UIColor, centerView: UIView? = nil) {
+    ///   - enableTapAnimation: 是否开启点击动画效果，默认为true
+    init(titles: [String], unselectedIcons: [String], selectedIcons: [String], selectedColor: UIColor, unselectedColor: UIColor, centerView: UIView? = nil, enableTapAnimation: Bool = true) {
         self.selectedColor = selectedColor
         self.unselectedColor = unselectedColor
         self.centerView = centerView
+        self.enableTapAnimation = enableTapAnimation
         super.init(frame: .zero)
         buildUI(titles: titles, unselectedIcons: unselectedIcons, selectedIcons: selectedIcons)
     }
@@ -97,17 +102,88 @@ class PZXCustomTabBar: UIView {
     @objc private func itemTapped(_ gesture: UITapGestureRecognizer) {
         guard let view = gesture.view else { return }
         let index = view.tag
+        
         selectItem(at: index)
         onItemSelected?(index)
     }
+    
     @objc private func centerTapped() {
+        // 中心按钮点击动画（独立的点击反馈）
+        if enableTapAnimation, let center = centerView {
+            performCenterTapAnimation(on: center)
+        }
         onCenterTapped?()
+    }
+    
+    // MARK: - 动画方法
+    /// 执行中心按钮点击动画（短暂的反馈动画）
+    private func performCenterTapAnimation(on view: UIView) {
+        UIView.animate(withDuration: 0.1, delay: 0, options: .curveEaseOut) {
+            view.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+        } completion: { _ in
+            UIView.animate(withDuration: 0.15, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5, options: .curveEaseInOut) {
+                view.transform = CGAffineTransform.identity
+            }
+        }
     }
     
     // MARK: - 选中逻辑
     func selectItem(at index: Int) {
         for (idx, item) in items.enumerated() {
-            item.isSelected = (idx == index)
+            let wasSelected = item.isSelected
+            let isSelected = (idx == index)
+            item.isSelected = isSelected
+            
+            // 执行选中/取消选中动画
+            if enableTapAnimation {
+                if isSelected && !wasSelected {
+                    // 新选中的项：放大到1.05倍
+                    performSelectAnimation(on: item)
+                } else if !isSelected && wasSelected {
+                    // 取消选中的项：缩回原尺寸
+                    performDeselectAnimation(on: item)
+                }
+            } else {
+                // 动画关闭时，直接设置transform状态
+                item.transform = isSelected ? CGAffineTransform(scaleX: 1.05, y: 1.05) : CGAffineTransform.identity
+            }
+        }
+    }
+    
+    /// 选中动画：缓慢放大到1.05倍并保持
+    private func performSelectAnimation(on view: UIView) {
+        UIView.animate(withDuration: 0.6, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.3, options: .curveEaseOut) {
+            view.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+        }
+    }
+    
+    /// 取消选中动画：缓慢缩回原尺寸
+    private func performDeselectAnimation(on view: UIView) {
+        UIView.animate(withDuration: 0.6, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.3, options: .curveEaseOut) {
+            view.transform = CGAffineTransform.identity
+        }
+    }
+    
+    // MARK: - 动态控制动画开关
+    /// 动态设置是否启用点击动画
+    func setTapAnimationEnabled(_ enabled: Bool) {
+        enableTapAnimation = enabled
+        
+        // 更新当前选中项的transform状态
+        for (idx, item) in items.enumerated() {
+            if item.isSelected {
+                if enabled {
+                    // 开启动画时，平滑过渡到放大状态
+                    UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
+                        item.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+                    }
+                } else {
+                    // 关闭动画时，平滑过渡到原始状态
+                    UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
+                        item.transform = CGAffineTransform.identity
+                    }
+                }
+            }
         }
     }
     
