@@ -96,6 +96,9 @@ class PZXCustomTabBar: UIView {
         }
         // 默认选中第0个
         selectItem(at: 0)
+        
+        // 确保初始状态下所有项的transform都正确设置
+        updateAllItemsTransform(animated: false)
     }
     
     // MARK: - 事件
@@ -134,18 +137,22 @@ class PZXCustomTabBar: UIView {
             let isSelected = (idx == index)
             item.isSelected = isSelected
             
-            // 执行选中/取消选中动画
+            // 根据动画开关决定是否应用transform效果
             if enableTapAnimation {
+                // 开启动画时：执行选中/取消选中动画
                 if isSelected && !wasSelected {
                     // 新选中的项：放大到1.05倍
                     performSelectAnimation(on: item)
                 } else if !isSelected && wasSelected {
                     // 取消选中的项：缩回原尺寸
                     performDeselectAnimation(on: item)
+                } else if isSelected {
+                    // 已经选中的项保持放大状态（无动画直接设置）
+                    item.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
                 }
             } else {
-                // 动画关闭时，直接设置transform状态
-                item.transform = isSelected ? CGAffineTransform(scaleX: 1.05, y: 1.05) : CGAffineTransform.identity
+                // 关闭动画时：所有项都保持原始大小
+                item.transform = CGAffineTransform.identity
             }
         }
     }
@@ -167,22 +174,34 @@ class PZXCustomTabBar: UIView {
     // MARK: - 动态控制动画开关
     /// 动态设置是否启用点击动画
     func setTapAnimationEnabled(_ enabled: Bool) {
+        let wasEnabled = enableTapAnimation
         enableTapAnimation = enabled
         
-        // 更新当前选中项的transform状态
-        for (idx, item) in items.enumerated() {
-            if item.isSelected {
-                if enabled {
-                    // 开启动画时，平滑过渡到放大状态
-                    UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
-                        item.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
-                    }
-                } else {
-                    // 关闭动画时，平滑过渡到原始状态
-                    UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
-                        item.transform = CGAffineTransform.identity
-                    }
+        // 如果动画开关状态发生变化，需要更新所有项的transform状态
+        if wasEnabled != enabled {
+            updateAllItemsTransform(animated: true)
+        }
+    }
+    
+    /// 更新所有项的transform状态
+    private func updateAllItemsTransform(animated: Bool) {
+        for item in items {
+            let targetTransform: CGAffineTransform
+            
+            if enableTapAnimation && item.isSelected {
+                // 动画开启且是选中项：放大
+                targetTransform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+            } else {
+                // 动画关闭或未选中项：原始大小
+                targetTransform = CGAffineTransform.identity
+            }
+            
+            if animated {
+                UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
+                    item.transform = targetTransform
                 }
+            } else {
+                item.transform = targetTransform
             }
         }
     }
