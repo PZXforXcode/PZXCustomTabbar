@@ -69,3 +69,17 @@ class PZXTabBar: UITabBar {
         return super.hitTest(point, with: event)
     }
 } 
+
+
+extension UITabBar {
+    
+    func cleanSystemPlatterView() {
+        for subview in subviews {
+            if String(describing: type(of: subview)) == "_UITabBarPlatterView" {
+                subview.removeFromSuperview()
+                print("❌ 已移除 _UITabBarPlatterView")
+            }
+        }
+    }
+
+}

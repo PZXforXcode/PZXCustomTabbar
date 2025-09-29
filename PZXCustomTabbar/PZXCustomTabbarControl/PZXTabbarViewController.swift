@@ -79,7 +79,9 @@ class PZXTabbarViewController: UITabBarController {
         
         // 4. 初始化我们自定义的 UITabBar 子类，并将自定义的 UIView 传入
         let tabBar = PZXTabBar(customTabBarView: pzx_customTabBar)
-        
+        //移除 液态玻璃视图  适配 iOS 26
+        tabBar.cleanSystemPlatterView()
+
         // 5. 【关键】通过 KVC 将系统原生的 tabBar 替换为我们自定义的 tabBar
         self.setValue(tabBar, forKey: "tabBar")
         
