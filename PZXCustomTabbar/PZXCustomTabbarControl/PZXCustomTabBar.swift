@@ -45,17 +45,25 @@ class PZXCustomTabBar: UIView {
         layer.shadowOffset = CGSize(width: 0, height: -2)
         layer.shadowRadius = 8
         
+        // 添加安全区域适配
+        setupSafeAreaSupport()
+        
         // stackView
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
         stackView.alignment = .fill
         stackView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stackView)
+        
+        // 获取安全区域底部高度
+        let safeAreaBottom = UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0
+        
+        // 设置stackView约束，如果有安全区域则留出空间
         NSLayoutConstraint.activate([
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
             stackView.topAnchor.constraint(equalTo: topAnchor),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor)
+            stackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -safeAreaBottom)
         ])
         
         // 创建普通 Item
@@ -85,11 +93,15 @@ class PZXCustomTabBar: UIView {
             center.translatesAutoresizingMaskIntoConstraints = false
             let width = center.bounds.width > 0 ? center.bounds.width : 64
             let height = center.bounds.height > 0 ? center.bounds.height : 64
+            
+            // 计算中心按钮的Y位置，考虑安全区域
+            let centerYOffset = safeAreaBottom > 0 ? 22 - safeAreaBottom/2 : 22
+            
             NSLayoutConstraint.activate([
                 center.widthAnchor.constraint(equalToConstant: width),
                 center.heightAnchor.constraint(equalToConstant: height),
                 center.centerXAnchor.constraint(equalTo: centerXAnchor),
-                center.centerYAnchor.constraint(equalTo: topAnchor, constant: 22)
+                center.centerYAnchor.constraint(equalTo: topAnchor, constant: centerYOffset)
             ])
             bringSubviewToFront(center)
             center.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(centerTapped)))
@@ -216,6 +228,32 @@ class PZXCustomTabBar: UIView {
             }
         }
         return super.hitTest(point, with: event)
+    }
+    
+    // MARK: - 安全区域适配
+    /// 设置安全区域适配，确保在iPhone X系列设备上正确显示
+    private func setupSafeAreaSupport() {
+        // 获取安全区域底部高度
+        let safeAreaBottom = UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0
+        
+        // 如果有安全区域，为安全区域添加背景色
+        if safeAreaBottom > 0 {
+            // 为安全区域添加背景色
+            let safeAreaView = UIView()
+            safeAreaView.backgroundColor = backgroundColor
+            safeAreaView.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(safeAreaView)
+            
+            NSLayoutConstraint.activate([
+                safeAreaView.leadingAnchor.constraint(equalTo: leadingAnchor),
+                safeAreaView.trailingAnchor.constraint(equalTo: trailingAnchor),
+                safeAreaView.bottomAnchor.constraint(equalTo: bottomAnchor),
+                safeAreaView.heightAnchor.constraint(equalToConstant: safeAreaBottom)
+            ])
+            
+            // 将安全区域视图置于底层
+            sendSubviewToBack(safeAreaView)
+        }
     }
     
     // MARK: - Badge 控制

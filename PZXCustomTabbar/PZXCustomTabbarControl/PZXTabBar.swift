@@ -7,6 +7,9 @@
 
 import UIKit
 
+/// 自定义TabBar类 - 已简化，主要用于兼容性
+/// 注意：在iOS 26中，由于手势拦截问题，我们改为直接隐藏系统TabBar
+/// 并将自定义TabBar直接添加到主视图上，因此这个类现在主要用于向后兼容
 class PZXTabBar: UITabBar {
     
     // MARK: - 属性
@@ -47,6 +50,7 @@ class PZXTabBar: UITabBar {
     
     // MARK: - 点击事件处理
     /// 重写hitTest方法，处理超出TabBar区域的中心按钮的点击事件
+    /// 注意：在iOS 26中，由于手势拦截问题，这个方法可能不会正常工作
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         // 如果视图隐藏、透明或不可交互，则不处理
         if self.isHidden || self.alpha == 0 || !self.isUserInteractionEnabled {

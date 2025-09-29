@@ -54,9 +54,18 @@ class PZXTabbarViewController: UITabBarController {
         setupCustomTabBar()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // 确保自定义TabBar的布局正确
+        updateCustomTabBarFrame()
+    }
+    
     // MARK: - 构建自定义 TabBar
     private func setupCustomTabBar() {
-        // 1. 初始化我们自定义的 UIView，传入动画开关参数
+        // 1. 完全隐藏系统TabBar，避免手势冲突
+        self.tabBar.isHidden = true
+        
+        // 2. 初始化我们自定义的 UIView，传入动画开关参数
         pzx_customTabBar = PZXCustomTabBar(
             titles: titles,
             unselectedIcons: unselectedIcons,
@@ -67,24 +76,36 @@ class PZXTabbarViewController: UITabBarController {
             enableTapAnimation: enableTapAnimation
         )
         
-        // 2. 设置回调：当自定义视图中的按钮被点击时，切换 UITabBarController 的 selectedIndex
+        // 3. 将自定义TabBar直接添加到主视图上
+        view.addSubview(pzx_customTabBar)
+        pzx_customTabBar.translatesAutoresizingMaskIntoConstraints = false
+        
+        // 4. 设置约束，确保TabBar贴到底部并适配安全区域
+        NSLayoutConstraint.activate([
+            pzx_customTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            pzx_customTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            pzx_customTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor), // 直接贴到底部
+            pzx_customTabBar.heightAnchor.constraint(equalToConstant: 83) // 标准TabBar高度 + 安全区域
+        ])
+        
+        // 5. 设置回调：当自定义视图中的按钮被点击时，切换 UITabBarController 的 selectedIndex
         pzx_customTabBar.onItemSelected = { [weak self] index in
             self?.selectedIndex = index
         }
         
-        // 3. 中心按钮点击回调
+        // 6. 中心按钮点击回调
         pzx_customTabBar.onCenterTapped = {
             print("中心按钮点击")
         }
         
-        // 4. 初始化我们自定义的 UITabBar 子类，并将自定义的 UIView 传入
-        let tabBar = PZXTabBar(customTabBarView: pzx_customTabBar)
-        
-        // 5. 【关键】通过 KVC 将系统原生的 tabBar 替换为我们自定义的 tabBar
-        self.setValue(tabBar, forKey: "tabBar")
-        
-        // 6. 默认选中第一个
+        // 7. 默认选中第一个
         selectTab(at: 0)
+    }
+    
+    /// 更新自定义TabBar的frame，确保布局正确
+    private func updateCustomTabBarFrame() {
+        // 确保自定义TabBar始终在正确的层级
+        view.bringSubviewToFront(pzx_customTabBar)
     }
     
     // MARK: - 对外开放功能
