@@ -25,24 +25,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         //let selectedColor = UIColor.red
 //        let unselectedColor = UIColor.cyan
         
-        // 创建自定义的DiscoverViewController并包装在导航控制器中
+        // 创建各个 Tab 的 ViewController（不再包装 NavigationController）
         let discoverVC = DiscoverViewController()
-        let discoverNavVC = UINavigationController(rootViewController: discoverVC)
         
         let sessionsVC = UIViewController()
         sessionsVC.view.backgroundColor = .systemGreen
         sessionsVC.title = "Sessions"
-        let sessionsNavVC = UINavigationController(rootViewController: sessionsVC)
         
         let inboxVC = UIViewController()
         inboxVC.view.backgroundColor = .systemOrange
         inboxVC.title = "Inbox"
-        let inboxNavVC = UINavigationController(rootViewController: inboxVC)
         
         let accountVC = UIViewController()
         accountVC.view.backgroundColor = .systemPurple
         accountVC.title = "Account"
-        let accountNavVC = UINavigationController(rootViewController: accountVC)
         
         // 自定义中心按钮
         let centerBtn = UIButton(type: .custom)
@@ -52,9 +48,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         centerBtn.layer.cornerRadius = 32
         centerBtn.frame = CGRect(x: 0, y: 0, width: 64, height: 64) // 固定大小
         
-        // 使用重构后的 PZXTabbarViewController 作为根控制器
-        let rootVC = PZXTabbarViewController(
-            viewControllers: [discoverNavVC, sessionsNavVC, inboxNavVC, accountNavVC],
+        // 创建 TabBarController（不再使用 NavigationController 包装的子控制器）
+        let tabBarVC = PZXTabbarViewController(
+            viewControllers: [discoverVC, sessionsVC, inboxVC, accountVC],
             titles: ["Discover","Sessions","Inbox","Account"],
             unselectedIcons: ["Discover","Sessions","Inbox","Account"],
             selectedIcons: ["Discover_selected","Sessions_selected","Inbox_selected","Account_selected"],
@@ -64,8 +60,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             enableTapAnimation: true  // 开启点击动画效果
         )
         
+        // 【关键修改】最外层使用 NavigationController 包装 TabBarController
+        let rootNavVC = UINavigationController(rootViewController: tabBarVC)
+        // 隐藏最外层导航栏，因为我们不需要在 TabBar 层级显示导航栏
+        rootNavVC.navigationBar.isHidden = true
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = rootVC
+        window?.rootViewController = rootNavVC
         window?.makeKeyAndVisible()
         
 

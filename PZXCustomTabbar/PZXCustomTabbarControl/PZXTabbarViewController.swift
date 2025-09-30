@@ -105,6 +105,12 @@ class PZXTabbarViewController: UITabBarController {
     func setTapAnimationEnabled(_ enabled: Bool) {
         pzx_customTabBar.setTapAnimationEnabled(enabled)
     }
+    
+    /// 获取最外层的 NavigationController（用于 push 操作）
+    /// - Returns: 最外层的 NavigationController，如果没有则返回 nil
+    func getRootNavigationController() -> UINavigationController? {
+        return self.navigationController
+    }
 }
 
 // MARK: - UIApplication 快捷获取根 TabbarVC

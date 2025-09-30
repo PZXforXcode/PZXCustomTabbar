@@ -18,7 +18,7 @@ class DiscoverViewController: UIViewController {
     private func setupUI() {
         view.backgroundColor = .systemBlue
         title = "Discover"
-        
+
         // 创建页面标题
         let titleLabel = UILabel()
         titleLabel.text = "Discover"
@@ -109,8 +109,6 @@ class DiscoverViewController: UIViewController {
     
     @objc private func centerButtonTapped() {
         let detailVC = DetailViewController()
-        // 可以在这里设置，也可以在DetailViewController内部设置
-        // 类似系统的 hidesBottomBarWhenPushed
         detailVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(detailVC, animated: true)
     }

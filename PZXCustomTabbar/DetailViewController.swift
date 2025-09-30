@@ -25,7 +25,8 @@ class DetailViewController: UIViewController {
         
         // 设置导航栏样式
         navigationController?.navigationBar.prefersLargeTitles = false
-        
+        self.navigationController?.navigationBar.isHidden = false
+
         // 创建内容视图
         let contentView = UIView()
         contentView.backgroundColor = .white
@@ -94,6 +95,14 @@ class DetailViewController: UIViewController {
     }
     
     @objc private func backButtonTapped() {
-        navigationController?.popViewController(animated: true)
+        // 【关键修改】返回时需要隐藏最外层导航栏
+        if let navController = navigationController {
+            navController.popViewController(animated: true)
+            
+            // 如果返回到 TabBar 层级，隐藏导航栏
+            if navController.viewControllers.count == 1 {
+                navController.setNavigationBarHidden(true, animated: true)
+            }
+        }
     }
 } 
